@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Residencial Morada Verde</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/ParqueMurucutu_1.js"></script>
+        <script src="data/ReservaFlorestalRPPN_2.js"></script>
+        <script src="data/Estradas_3.js"></script>
+        <script src="data/Igarap_Murucutu_4.js"></script>
+        <script src="data/reaTotalRegistradaMV_5.js"></script>
+        <script src="data/MuroAtual_6.js"></script>
+        <script src="data/LotesInfra_7.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:20, minZoom:14
+        }).fitBounds([[-1.4380436011629132,-48.43909072513808],[-1.4335311114610398,-48.43219928104057]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var title = new L.Control({'position':'topright'});
+        title.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+        title.update = function () {
+            this._div.innerHTML = '<h2>Residencial Morada Verde</h2>';
+        };
+        title.addTo(map);
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            map.setMaxBounds(map.getBounds());
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            minZoom: 14,
+            maxZoom: 20,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_GoogleSatellite_0;
+        map.addLayer(layer_GoogleSatellite_0);
+        function pop_ParqueMurucutu_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['fid_1'] !== null ? autolinker.link(String(feature.properties['fid_1']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ParqueMurucutu_1_0() {
+            return {
+                pane: 'pane_ParqueMurucutu_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 4.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(114,155,111,1.0)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_ParqueMurucutu_1');
+        map.getPane('pane_ParqueMurucutu_1').style.zIndex = 401;
+        map.getPane('pane_ParqueMurucutu_1').style['mix-blend-mode'] = 'normal';
+        var layer_ParqueMurucutu_1 = new L.geoJson(json_ParqueMurucutu_1, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_ParqueMurucutu_1',
+            layerName: 'layer_ParqueMurucutu_1',
+            pane: 'pane_ParqueMurucutu_1',
+            onEachFeature: pop_ParqueMurucutu_1,
+            style: style_ParqueMurucutu_1_0,
+        });
+        bounds_group.addLayer(layer_ParqueMurucutu_1);
+        map.addLayer(layer_ParqueMurucutu_1);
+        function pop_ReservaFlorestalRPPN_2(feature, layer) {
+            var popupContent = '<table>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ReservaFlorestalRPPN_2_0() {
+            return {
+                pane: 'pane_ReservaFlorestalRPPN_2',
+                opacity: 1,
+                color: 'rgba(56,128,54,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(96,218,92,1.0)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_ReservaFlorestalRPPN_2');
+        map.getPane('pane_ReservaFlorestalRPPN_2').style.zIndex = 402;
+        map.getPane('pane_ReservaFlorestalRPPN_2').style['mix-blend-mode'] = 'normal';
+        var layer_ReservaFlorestalRPPN_2 = new L.geoJson(json_ReservaFlorestalRPPN_2, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_ReservaFlorestalRPPN_2',
+            layerName: 'layer_ReservaFlorestalRPPN_2',
+            pane: 'pane_ReservaFlorestalRPPN_2',
+            onEachFeature: pop_ReservaFlorestalRPPN_2,
+            style: style_ReservaFlorestalRPPN_2_0,
+        });
+        bounds_group.addLayer(layer_ReservaFlorestalRPPN_2);
+        map.addLayer(layer_ReservaFlorestalRPPN_2);
+        function pop_Estradas_3(feature, layer) {
+            var popupContent = '<table>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Estradas_3_0() {
+            return {
+                pane: 'pane_Estradas_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(212,206,208,1.0)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_Estradas_3');
+        map.getPane('pane_Estradas_3').style.zIndex = 403;
+        map.getPane('pane_Estradas_3').style['mix-blend-mode'] = 'normal';
+        var layer_Estradas_3 = new L.geoJson(json_Estradas_3, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_Estradas_3',
+            layerName: 'layer_Estradas_3',
+            pane: 'pane_Estradas_3',
+            onEachFeature: pop_Estradas_3,
+            style: style_Estradas_3_0,
+        });
+        bounds_group.addLayer(layer_Estradas_3);
+        map.addLayer(layer_Estradas_3);
+        function pop_Igarap_Murucutu_4(feature, layer) {
+            var popupContent = '<table>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Igarap_Murucutu_4_0() {
+            return {
+                pane: 'pane_Igarap_Murucutu_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(139,232,246,1.0)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_Igarap_Murucutu_4');
+        map.getPane('pane_Igarap_Murucutu_4').style.zIndex = 404;
+        map.getPane('pane_Igarap_Murucutu_4').style['mix-blend-mode'] = 'normal';
+        var layer_Igarap_Murucutu_4 = new L.geoJson(json_Igarap_Murucutu_4, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_Igarap_Murucutu_4',
+            layerName: 'layer_Igarap_Murucutu_4',
+            pane: 'pane_Igarap_Murucutu_4',
+            onEachFeature: pop_Igarap_Murucutu_4,
+            style: style_Igarap_Murucutu_4_0,
+        });
+        bounds_group.addLayer(layer_Igarap_Murucutu_4);
+        map.addLayer(layer_Igarap_Murucutu_4);
+        function pop_reaTotalRegistradaMV_5(feature, layer) {
+            var popupContent = '<table>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_reaTotalRegistradaMV_5_0() {
+            return {
+                pane: 'pane_reaTotalRegistradaMV_5',
+                opacity: 1,
+                color: 'rgba(240,41,5,1.0)',
+                dashArray: '40.0,8.0',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_reaTotalRegistradaMV_5');
+        map.getPane('pane_reaTotalRegistradaMV_5').style.zIndex = 405;
+        map.getPane('pane_reaTotalRegistradaMV_5').style['mix-blend-mode'] = 'normal';
+        var layer_reaTotalRegistradaMV_5 = new L.geoJson(json_reaTotalRegistradaMV_5, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_reaTotalRegistradaMV_5',
+            layerName: 'layer_reaTotalRegistradaMV_5',
+            pane: 'pane_reaTotalRegistradaMV_5',
+            onEachFeature: pop_reaTotalRegistradaMV_5,
+            style: style_reaTotalRegistradaMV_5_0,
+        });
+        bounds_group.addLayer(layer_reaTotalRegistradaMV_5);
+        map.addLayer(layer_reaTotalRegistradaMV_5);
+        function pop_MuroAtual_6(feature, layer) {
+            var popupContent = '<table>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_MuroAtual_6_0() {
+            return {
+                pane: 'pane_MuroAtual_6',
+                opacity: 1,
+                color: 'rgba(235,239,8,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_MuroAtual_6');
+        map.getPane('pane_MuroAtual_6').style.zIndex = 406;
+        map.getPane('pane_MuroAtual_6').style['mix-blend-mode'] = 'normal';
+        var layer_MuroAtual_6 = new L.geoJson(json_MuroAtual_6, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_MuroAtual_6',
+            layerName: 'layer_MuroAtual_6',
+            pane: 'pane_MuroAtual_6',
+            onEachFeature: pop_MuroAtual_6,
+            style: style_MuroAtual_6_0,
+        });
+        bounds_group.addLayer(layer_MuroAtual_6);
+        map.addLayer(layer_MuroAtual_6);
+        function pop_LotesInfra_7(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ET_ID'] !== null ? autolinker.link(String(feature.properties['ET_ID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['FID_'] !== null ? autolinker.link(String(feature.properties['FID_']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Entity'] !== null ? autolinker.link(String(feature.properties['Entity']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Layer'] !== null ? autolinker.link(String(feature.properties['Layer']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Color'] !== null ? autolinker.link(String(feature.properties['Color']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Linetype'] !== null ? autolinker.link(String(feature.properties['Linetype']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Elevation'] !== null ? autolinker.link(String(feature.properties['Elevation']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LineWt'] !== null ? autolinker.link(String(feature.properties['LineWt']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['RefName'] !== null ? autolinker.link(String(feature.properties['RefName']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_LotesInfra_7_0() {
+            return {
+                pane: 'pane_LotesInfra_7',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 3.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_LotesInfra_7');
+        map.getPane('pane_LotesInfra_7').style.zIndex = 407;
+        map.getPane('pane_LotesInfra_7').style['mix-blend-mode'] = 'normal';
+        var layer_LotesInfra_7 = new L.geoJson(json_LotesInfra_7, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_LotesInfra_7',
+            layerName: 'layer_LotesInfra_7',
+            pane: 'pane_LotesInfra_7',
+            onEachFeature: pop_LotesInfra_7,
+            style: style_LotesInfra_7_0,
+        });
+        bounds_group.addLayer(layer_LotesInfra_7);
+        map.addLayer(layer_LotesInfra_7);
+        var overlaysTree = [
+            {label: '<img src="legend/LotesInfra_7.png" /> Lotes / Infra', layer: layer_LotesInfra_7},
+            {label: '<img src="legend/MuroAtual_6.png" /> Muro Atual', layer: layer_MuroAtual_6},
+            {label: '<img src="legend/reaTotalRegistradaMV_5.png" /> Área Total Registrada MV', layer: layer_reaTotalRegistradaMV_5},
+            {label: '<img src="legend/Igarap_Murucutu_4.png" /> Igarapé_Murucutu', layer: layer_Igarap_Murucutu_4},
+            {label: '<img src="legend/Estradas_3.png" /> Estradas', layer: layer_Estradas_3},
+            {label: '<img src="legend/ReservaFlorestalRPPN_2.png" /> Reserva Florestal - RPPN', layer: layer_ReservaFlorestalRPPN_2},
+            {label: '<img src="legend/ParqueMurucutu_1.png" /> Parque Murucutu', layer: layer_ParqueMurucutu_1},
+            {label: "Google Satellite", layer: layer_GoogleSatellite_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: false, 
+        });
+        lay.addTo(map);
+		document.addEventListener("DOMContentLoaded", function() {
+            // set new Layers List height which considers toggle icon
+            function newLayersListHeight() {
+                var layerScrollbarElement = document.querySelector('.leaflet-control-layers-scrollbar');
+                if (layerScrollbarElement) {
+                    var layersListElement = document.querySelector('.leaflet-control-layers-list');
+                    var originalHeight = layersListElement.style.height 
+                        || window.getComputedStyle(layersListElement).height;
+                    var newHeight = parseFloat(originalHeight) - 50;
+                    layersListElement.style.height = newHeight + 'px';
+                }
+            }
+            var isLayersListExpanded = true;
+            var controlLayersElement = document.querySelector('.leaflet-control-layers');
+            var toggleLayerControl = document.querySelector('.leaflet-control-layers-toggle');
+            // toggle Collapsed/Expanded and apply new Layers List height
+            toggleLayerControl.addEventListener('click', function() {
+                if (isLayersListExpanded) {
+                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
+                } else {
+                    controlLayersElement.classList.add('leaflet-control-layers-expanded');
+                }
+                isLayersListExpanded = !isLayersListExpanded;
+                newLayersListHeight()
+            });	
+			// apply new Layers List height if toggle layerstree
+			if (controlLayersElement) {
+				controlLayersElement.addEventListener('click', function(event) {
+					var toggleLayerHeaderPointer = event.target.closest('.leaflet-layerstree-header-pointer span');
+					if (toggleLayerHeaderPointer) {
+						newLayersListHeight();
+					}
+				});
+			}
+            // Collapsed/Expanded at Start to apply new height
+            setTimeout(function() {
+                toggleLayerControl.click();
+            }, 10);
+            setTimeout(function() {
+                toggleLayerControl.click();
+            }, 10);
+            // Collapsed touch/small screen
+            var isSmallScreen = window.innerWidth < 650;
+            if (isSmallScreen) {
+                setTimeout(function() {
+                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
+                    isLayersListExpanded = !isLayersListExpanded;
+                }, 500);
+            }  
+        });       
+        setBounds();
+        </script>
+    </body>
+</html>
